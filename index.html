@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>jotwils</title>
+<link rel="icon" type="image/jpeg" href="logocarrosm.jpeg">
+<link rel="apple-touch-icon" href="logocarrosm.jpeg">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0c0e13">
+<style>
+:root{
+  --bg:#0c0e13; --panel:#151821; --panel2:#1c202b; --border:#272c38;
+  --text:#eef0f4; --muted:#8b93a5; --accent:#ff5b2e; --accent2:#ffb020;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  box-sizing:border-box;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:26px 16px 60px}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.logo{height:40px;width:auto;display:block;border-radius:8px}
+.logo-fb{font-size:1.7rem;line-height:1}
+.brand-name{font-weight:700;font-size:1.05rem;letter-spacing:.04em;color:var(--accent2)}
+h1{font-size:1.3rem;margin:0 0 4px}
+.sub{color:var(--muted);font-size:0.85rem;margin:0 0 16px}
+.total{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--border);
+  border-radius:20px;padding:6px 14px;font-size:0.82rem;color:var(--muted);margin-bottom:18px}
+.total b{color:var(--accent2);font-size:1rem}
+select{width:100%;padding:12px 14px;font-size:1rem;background:var(--panel);color:var(--text);
+  border:1px solid var(--border);border-radius:10px;appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 20px) calc(50% - 2px),calc(100% - 15px) calc(50% - 2px);
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.controls{display:flex;gap:10px;flex-wrap:wrap}
+.controls select{flex:1;min-width:180px}
+input#search{flex:1;min-width:180px;padding:12px 14px;font-size:0.95rem;background:var(--panel);
+  color:var(--text);border:1px solid var(--border);border-radius:10px}
+input#search::placeholder{color:var(--muted)}
+.count{margin:14px 0 0;color:var(--muted);font-size:0.85rem}
+.count b{color:var(--accent2);font-size:1.05rem}
+.grid{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.photo{aspect-ratio:4/3;width:100%;background:var(--panel2);position:relative}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  font-size:0.7rem;color:rgba(255,255,255,.75);background:linear-gradient(135deg,var(--accent),var(--panel2))}
+.photo .ph span:first-child{font-size:2rem}
+.info{padding:10px 12px}
+.name{font-weight:600;font-size:0.9rem;line-height:1.25}
+.code{margin-top:6px;display:inline-block;background:var(--panel2);border:1px solid var(--border);border-radius:6px;
+  padding:2px 8px;font-size:0.72rem;font-weight:600;color:var(--accent2);letter-spacing:.03em}
+.empty{color:var(--muted);text-align:center;padding:50px 10px;font-size:0.9rem}
+.photo{cursor:pointer}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;
+  z-index:1000;padding:20px;padding-top:calc(20px + env(safe-area-inset-top,0px));
+  padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+.lightbox.open{display:flex}
+.lightbox img{max-width:100%;max-height:100%;border-radius:10px;object-fit:contain}
+.lightbox-close{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:16px;
+  width:40px;height:40px;border-radius:50%;background:var(--panel);border:1px solid var(--border);
+  color:var(--text);font-size:1.3rem;display:flex;align-items:center;justify-content:center;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <img src="logocarrosm.jpeg" alt="jotwils" class="logo" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-fb',textContent:'🏎️'}))">
+    <span class="brand-name">jotwils</span>
+  </div>
+  <h1>Mi Colección</h1>
+  <p class="sub">Elige una marca y verás todos tus carros de esa marca con su foto y código.</p>
+  <div class="total"><b id="totalCount">0</b> carritos en total</div>
+
+  <div class="controls">
+    <select id="brandSelect"><option value="">— Selecciona una marca —</option></select>
+    <input id="search" type="text" placeholder="Buscar marca o código...">
+  </div>
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty">Selecciona una marca para ver tus carros.</div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-close" id="lightboxClose">✕</div>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<script>
+const data = [
+  {marca:"Mazda", modelo:"Mazda RX-7", codigo:"EJ001"},
+  {marca:"Mazda", modelo:"Mazda MX-5 Miata", codigo:"EJ002"},
+  {marca:"Mazda", modelo:"Mazda RX-3", codigo:"EJ003"},
+  {marca:"Ford", modelo:"Ford Mustang GT", codigo:"EJ004"},
+  {marca:"Ford", modelo:"Ford GT40", codigo:"EJ005"},
+  {marca:"Ford", modelo:"Ford Bronco", codigo:"EJ006"},
+  {marca:"Chevrolet", modelo:"Chevrolet Camaro SS", codigo:"EJ007"},
+  {marca:"Chevrolet", modelo:"Chevrolet Corvette C8", codigo:"EJ008"},
+  {marca:"Toyota", modelo:"Toyota Supra MK4", codigo:"EJ009"},
+  {marca:"Toyota", modelo:"Toyota Land Cruiser", codigo:"EJ010"},
+  {marca:"Honda", modelo:"Honda Civic Type R", codigo:"EJ011"},
+  {marca:"Nissan", modelo:"Nissan Skyline GT-R", codigo:"EJ012"},
+  {marca:"Porsche", modelo:"Porsche 911 GT3", codigo:"EJ013"},
+  {marca:"Volkswagen", modelo:"Volkswagen Golf GTI", codigo:"EJ014"},
+];
+
+const select = document.getElementById('brandSelect');
+const grid = document.getElementById('grid');
+const count = document.getElementById('count');
+const empty = document.getElementById('empty');
+document.getElementById('totalCount').textContent = data.length;
+
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+document.getElementById('lightboxClose').addEventListener('click', ()=>lightbox.classList.remove('open'));
+lightbox.addEventListener('click', (e)=>{ if(e.target===lightbox) lightbox.classList.remove('open'); });
+
+const brandCounts = {};
+data.forEach(c => brandCounts[c.marca] = (brandCounts[c.marca]||0)+1);
+Object.keys(brandCounts).sort().forEach(b=>{
+  const o=document.createElement('option');
+  o.value=b; o.textContent = b + " (" + brandCounts[b] + ")";
+  select.appendChild(o);
+});
+
+const search = document.getElementById('search');
+
+function render(){
+  const b = select.value;
+  const q = search.value.trim().toLowerCase();
+  grid.innerHTML='';
+  const hasFilter = b || q;
+  if(!hasFilter){count.innerHTML='';empty.style.display='block';empty.textContent='Selecciona una marca o escribe para buscar.';return;}
+  const cars = data.filter(c =>
+    (!b || c.marca===b) &&
+    (!q || c.marca.toLowerCase().includes(q) || c.codigo.toLowerCase().includes(q) || c.modelo.toLowerCase().includes(q))
+  );
+  empty.style.display = cars.length ? 'none' : 'block';
+  empty.textContent = 'No hay resultados con ese filtro.';
+  count.innerHTML = cars.length ? ("<b>" + cars.length + "</b> carritos encontrados") : "";
+  cars.forEach(c=>{
+    const card=document.createElement('div');
+    card.className='card';
+    card.innerHTML =
+      '<div class="photo"><img src="' + c.codigo + '.jpeg" alt="' + c.modelo + '"></div>' +
+      '<div class="info"><div class="name">' + c.modelo + '</div>' +
+      '<div class="code">' + c.codigo + '</div></div>';
+    const img=card.querySelector('img');
+    const photoDiv=card.querySelector('.photo');
+    img.onerror=()=>{
+      img.remove();
+      photoDiv.style.cursor='default';
+      const ph=document.createElement('div');
+      ph.className='ph';
+      ph.innerHTML='<span>🏎️</span><span>Sin foto</span>';
+      photoDiv.appendChild(ph);
+    };
+    photoDiv.addEventListener('click',()=>{
+      if(!photoDiv.contains(img)) return;
+      lightboxImg.src=img.src;
+      lightboxImg.alt=c.modelo;
+      lightbox.classList.add('open');
+    });
+    grid.appendChild(card);
+  });
+}
+select.addEventListener('change',render);
+search.addEventListener('input',render);
+render();
+
+</script>
+</body>
+</html>
