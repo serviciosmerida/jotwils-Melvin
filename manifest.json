@@ -1,0 +1,21 @@
+{
+  "name": "jotwils - Mi Colección",
+  "short_name": "jotwils",
+  "description": "Colección de Hot Wheels",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0c0e13",
+  "theme_color": "#0c0e13",
+  "icons": [
+    {
+      "src": "logocarrosm.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "logocarrosm.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
