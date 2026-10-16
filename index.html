@@ -7,11 +7,11 @@
 <link rel="icon" type="image/jpeg" href="logocarrosm.jpeg">
 <link rel="apple-touch-icon" href="logocarrosm.jpeg">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0c0e13">
+<meta name="theme-color" content="#f4f5f7">
 <style>
 :root{
-  --bg:#0c0e13; --panel:#151821; --panel2:#1c202b; --border:#272c38;
-  --text:#eef0f4; --muted:#8b93a5; --accent:#ff5b2e; --accent2:#ffb020;
+  --bg:#f4f5f7; --panel:#ffffff; --panel2:#eef0f4; --border:#dfe3ea;
+  --text:#1b1f27; --muted:#667085; --accent:#ff5b2e; --accent2:#b86e00;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
   box-sizing:border-box;
 }
@@ -36,9 +36,6 @@ select{width:100%;padding:12px 14px;font-size:1rem;background:var(--panel);color
   background-size:5px 5px,5px 5px;background-repeat:no-repeat}
 .controls{display:flex;gap:10px;flex-wrap:wrap}
 .controls select{flex:1;min-width:180px}
-input#search{flex:1;min-width:180px;padding:12px 14px;font-size:0.95rem;background:var(--panel);
-  color:var(--text);border:1px solid var(--border);border-radius:10px}
-input#search::placeholder{color:var(--muted)}
 .count{margin:14px 0 0;color:var(--muted);font-size:0.85rem}
 .count b{color:var(--accent2);font-size:1.05rem}
 .grid{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
@@ -46,10 +43,11 @@ input#search::placeholder{color:var(--muted)}
 .photo{aspect-ratio:4/3;width:100%;background:var(--panel2);position:relative}
 .photo img{width:100%;height:100%;object-fit:cover;display:block}
 .photo .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  font-size:0.7rem;color:rgba(255,255,255,.75);background:linear-gradient(135deg,var(--accent),var(--panel2))}
+  font-size:0.7rem;color:#fff;background:linear-gradient(135deg,var(--accent),#ff9a5c)}
 .photo .ph span:first-child{font-size:2rem}
 .info{padding:10px 12px}
 .name{font-weight:600;font-size:0.9rem;line-height:1.25}
+.rep{margin-left:4px;background:var(--accent);color:#fff;border-radius:4px;padding:0 6px}
 .code{margin-top:6px;display:inline-block;background:var(--panel2);border:1px solid var(--border);border-radius:6px;
   padding:2px 8px;font-size:0.72rem;font-weight:600;color:var(--accent2);letter-spacing:.03em}
 .empty{color:var(--muted);text-align:center;padding:50px 10px;font-size:0.9rem}
@@ -72,11 +70,10 @@ input#search::placeholder{color:var(--muted)}
   </div>
   <h1>Mi Colección</h1>
   <p class="sub">Elige una marca y verás todos tus carros de esa marca con su foto y código.</p>
-  <div class="total"><b id="totalCount">0</b> carritos en total</div>
+  <div class="total"><b id="totalCount">0</b> carritos en total<span id="totalSub"></span></div>
 
   <div class="controls">
     <select id="brandSelect"><option value="">— Selecciona una marca —</option></select>
-    <input id="search" type="text" placeholder="Buscar marca o código...">
   </div>
   <div class="count" id="count"></div>
   <div class="grid" id="grid"></div>
@@ -90,27 +87,116 @@ input#search::placeholder{color:var(--muted)}
 
 <script>
 const data = [
-  {marca:"Mazda", modelo:"Mazda RX-7", codigo:"EJ001"},
-  {marca:"Mazda", modelo:"Mazda MX-5 Miata", codigo:"EJ002"},
-  {marca:"Mazda", modelo:"Mazda RX-3", codigo:"EJ003"},
-  {marca:"Ford", modelo:"Ford Mustang GT", codigo:"EJ004"},
-  {marca:"Ford", modelo:"Ford GT40", codigo:"EJ005"},
-  {marca:"Ford", modelo:"Ford Bronco", codigo:"EJ006"},
-  {marca:"Chevrolet", modelo:"Chevrolet Camaro SS", codigo:"EJ007"},
-  {marca:"Chevrolet", modelo:"Chevrolet Corvette C8", codigo:"EJ008"},
-  {marca:"Toyota", modelo:"Toyota Supra MK4", codigo:"EJ009"},
-  {marca:"Toyota", modelo:"Toyota Land Cruiser", codigo:"EJ010"},
-  {marca:"Honda", modelo:"Honda Civic Type R", codigo:"EJ011"},
-  {marca:"Nissan", modelo:"Nissan Skyline GT-R", codigo:"EJ012"},
-  {marca:"Porsche", modelo:"Porsche 911 GT3", codigo:"EJ013"},
-  {marca:"Volkswagen", modelo:"Volkswagen Golf GTI", codigo:"EJ014"},
+  {marca:"Mercedes-Benz", modelo:"MERCEDES-BENZ 500 E", codigo:"GRX59"},
+  {marca:"Toyota", modelo:"TOYOTA GR86 CUP", codigo:"HRY77"},
+  {marca:"Pontiac", modelo:"PONTIAC AZTEK CUSTOM", codigo:"HRY61"},
+  {marca:"Chevrolet", modelo:"CORVETTE C7 Z06", codigo:"DTW49"},
+  {marca:"Hot Wheels Original", modelo:"KING KUDA", codigo:"FJX55"},
+  {marca:"Cupra", modelo:"CUPRA e-RACER", codigo:"HYW15"},
+  {marca:"Chevrolet", modelo:"1966 CHEVY NOVA", codigo:"K6141"},
+  {marca:"Land Rover", modelo:"LAND ROVER DEFENDER 90 1", codigo:"GHB381"},
+  {marca:"Audi", modelo:"87 AUDI QUATTRO", codigo:"HRY55"},
+  {marca:"Mazda", modelo:"89 MAZDA SAVANNA RX-7 FC3S", codigo:"GHB56"},
+  {marca:"Lamborghini", modelo:"71 LAMBORGHINI MIURA SV", codigo:"FXB06"},
+  {marca:"Ford", modelo:"67 FORD GT40 Mk.IV", codigo:"GRX30"},
+  {marca:"Porsche", modelo:"PORSCHE 904 CARRERA GTS", codigo:"HRY73"},
+  {marca:"Lamborghini", modelo:"LAMBORGHINI HURACÁN STERRATO", codigo:"HRY87"},
+  {marca:"Mazda", modelo:"MAZDA 787B", codigo:"HKH01"},
+  {marca:"Bugatti", modelo:"16 BUGATTI CHIRON", codigo:"FYB49"},
+  {marca:"DeLorean", modelo:"DMC DELOREAN", codigo:"R0931"},
+  {marca:"Pontiac", modelo:"77 PONTIAC FIREBIRD T/A", codigo:"T21"},
+  {marca:"Porsche", modelo:"1983 PORSCHE 928S", codigo:"HYW53"},
+  {marca:"Chevrolet", modelo:"70 CHEVY CAMARO RS", codigo:"GTB37"},
+  {marca:"Ford", modelo:"70 FORD ESCORT RS1600", codigo:"JJK08"},
+  {marca:"Chevrolet", modelo:"55 CHEVY", codigo:"T42", cant:2},
+  {marca:"Honda", modelo:"HONDA S800 RACING", codigo:"T27"},
+  {marca:"Datsun", modelo:"1975 DATSUN SUNNY TRUCK (B120)", codigo:"HYX36"},
+  {marca:"Chevrolet", modelo:"80 EL CAMINO", codigo:"GRY33"},
+  {marca:"Chevrolet", modelo:"76 CHEVY CHEVETTE", codigo:"HKH35"},
+  {marca:"Chevrolet", modelo:"58 CHEVY IMPALA", codigo:"L0732"},
+  {marca:"Chevrolet", modelo:"CUSTOM 68 CAMARO", codigo:"HKG68"},
+  {marca:"Ford", modelo:"71 MUSTANG FUNNY CAR", codigo:"FYC43"},
+  {marca:"Buick", modelo:"66 BUICK RIVIERA", codigo:"HYW16"},
+  {marca:"Mercury", modelo:"69 MERCURY COUGAR ELIMINATOR", codigo:"N4011"},
+  {marca:"Mercury", modelo:"49 DRAG MERC", codigo:"HTB54"},
+  {marca:"Jaguar", modelo:"JAGUAR MK1", codigo:"HRY80"},
+  {marca:"Aston Martin", modelo:"ASTON MARTIN DB4GT HIGH-SPEED EDITION", codigo:"DB4GT"},
+  {marca:"Mercury", modelo:"69 MERCURY CYCLONE", codigo:"U08N"},
+  {marca:"Chevrolet", modelo:"64 CHEVY CHEVELLE SS", codigo:"HTC58"},
+  {marca:"Mercury", modelo:"68 MERCURY COUGAR", codigo:"R27"},
+  {marca:"Dodge", modelo:"71 DODGE CHALLENGER", codigo:"T9682"},
+  {marca:"Dodge", modelo:"68 DODGE DART 1", codigo:"T51N1"},
+  {marca:"Dodge", modelo:"68 DODGE DART 2", codigo:"T51N2"},
+  {marca:"Dodge", modelo:"70 DODGE HEMI CHALLENGER 1", codigo:"FJX791"},
+  {marca:"Dodge", modelo:"74 BRAZILIAN DODGE CHARGER", codigo:"BDD21"},
+  {marca:"Dodge", modelo:"64 DODGE 330", codigo:"JJJ64"},
+  {marca:"Dodge", modelo:"69 DODGE CORONET SUPERBEE", codigo:"U15N"},
+  {marca:"Dodge", modelo:"70 DODGE HEMI CHALLENGER 2", codigo:"FJX792"},
+  {marca:"Dodge", modelo:"68 DODGE DART 3", codigo:"T51N3"},
+  {marca:"Ford", modelo:"FORD MODEL A CUSTOM 31", codigo:"HYW24"},
+  {marca:"BMW", modelo:"BMW 2002", codigo:"T51N"},
+  {marca:"Jeep", modelo:"1988 JEEP WAGONEER", codigo:"HKG86"},
+  {marca:"Maserati", modelo:"MASERATI TIPO 61", codigo:"JJH44"},
+  {marca:"Datsun", modelo:"DATSUN 24OZ", codigo:"J3277"},
+  {marca:"Volvo", modelo:"VOLVO 240 DRIFT WAGON", codigo:"HCT20"},
+  {marca:"BMW", modelo:"92 BMW M3", codigo:"HTB06"},
+  {marca:"Ford", modelo:"67 SHELBY GT500", codigo:"R0916"},
+  {marca:"Ford", modelo:"FORD TRANSIT CONNECT", codigo:"GHC65"},
+  {marca:"Fiat", modelo:"FIAT 500e", codigo:"FXB29"},
+  {marca:"Fiat", modelo:"60s FIAT 5000 MODIFICADO", codigo:"HTC20"},
+  {marca:"Mazda", modelo:"MAZDA REPU 1", codigo:"DTX001"},
+  {marca:"Ford", modelo:"99 FORD F-150 SVT LIGHTNING", codigo:"GHB33"},
+  {marca:"Mazda", modelo:"MAZDA REPU 2", codigo:"DTX002"},
+  {marca:"GMC", modelo:"91 GMC SYCLONE", codigo:"GHB35"},
+  {marca:"Chevrolet", modelo:"52 CHEVY 1", codigo:"CFJ211"},
+  {marca:"Chevrolet", modelo:"CHEVY EL CAMINO", codigo:"HNT10"},
+  {marca:"Chevrolet", modelo:"52 CHEVY 2", codigo:"CFJ212"},
+  {marca:"Chevrolet", modelo:"67 CHEVY C10", codigo:"HYX51"},
+  {marca:"Otros / Licencias", modelo:"K.I.T.T SUPER PURSUIT MODE", codigo:"HCV39"},
+  {marca:"Otros / Licencias", modelo:"K.I.T.T", codigo:"HYX27"},
+  {marca:"Cadillac", modelo:"CUSTOM 53 CADILLAC", codigo:"HYY78"},
+  {marca:"Audi", modelo:"94 AUDI AVANT RS2", codigo:"GRX27"},
+  {marca:"Honda", modelo:"2018 HONDA CIVIC TYPE R2 1", codigo:"FYB721"},
+  {marca:"Honda", modelo:"2018 HONDA CIVIC TYPE R 2", codigo:"FYB722"},
+  {marca:"Dodge", modelo:"1978 DODGE LI´L RED EXPRESS TRUCK", codigo:"HRY97"},
+  {marca:"Dodge", modelo:"70 DODGE POWER WAGON", codigo:"GHC39"},
+  {marca:"Land Rover", modelo:"15 LAND ROVER DEFENDER DOUBLE CAB", codigo:"FJV45"},
+  {marca:"BMW", modelo:"BMW M3 WAGON 1", codigo:"HRY671"},
+  {marca:"BMW", modelo:"BMW M3 WAGON 2", codigo:"HRY672"},
+  {marca:"Chevrolet", modelo:"64 CHEVY NOVA WAGON", codigo:"HKH70"},
+  {marca:"Honda", modelo:"73 HONDA CIVIC CUSTOM", codigo:"HKG40"},
+  {marca:"Nissan", modelo:"NISSAN SKYLINE 2000GT-R LBWK", codigo:"HRY85"},
+  {marca:"Mazda", modelo:"MAZDA RX-3 1", codigo:"HRY711"},
+  {marca:"Bentley", modelo:"2018 BENTLEY CONTINENTAL GT3", codigo:"GHB29"},
+  {marca:"Porsche", modelo:"PORSCHE 911 CARRERA RS 2,7", codigo:"HKG42"},
+  {marca:"Jaguar", modelo:"15 JAGUAR F-TYPE PROJECT 7", codigo:"HTD74"},
+  {marca:"Nissan", modelo:"NISSAN SKYLINE GT-R (BCNR33) 1", codigo:"FJV511"},
+  {marca:"Nissan", modelo:"96 NISSAN 180SX TYPE X", codigo:"HTB08"},
+  {marca:"Subaru", modelo:"98 SUBARU IMPREZA 22B-STi VERSION", codigo:"GHB42"},
+  {marca:"Mazda", modelo:"MAZDA RX-7", codigo:"HTF61"},
+  {marca:"Subaru", modelo:"SUBARU IMPREZA WRX", codigo:"HVX23"},
+  {marca:"Hot Wheels Original", modelo:"GONE MAD", codigo:"HYW56"},
+  {marca:"Porsche", modelo:"PORSCHE 911 GT3", codigo:"HCT22"},
+  {marca:"Porsche", modelo:"PORSCHE 911 CARRERA CLIP", codigo:"JBB12"},
+  {marca:"Hot Wheels Original", modelo:"DUNE IT UP", codigo:"HYX35"},
+  {marca:"Nissan", modelo:"NISSAN SKYLINE GT-R (BCNR33) 2", codigo:"FJV512"},
+  {marca:"Mazda", modelo:"MAZDA RX-7", codigo:"HTD54"},
+  {marca:"Hot Wheels Original", modelo:"HAKO TYPE D", codigo:"HYW25"},
+  {marca:"Nissan", modelo:"NISSAN SKYLINE RS (KDR30)", codigo:"FJV44"},
+  {marca:"Mazda", modelo:"MAZDA RX-3 2", codigo:"HRY712"},
+  {marca:"Land Rover", modelo:"LAND ROVER DEFENDER 90 2", codigo:"GHB382"},
+  {marca:"Chevrolet", modelo:"CHEVY BLAZER 4X4 1", codigo:"JBB781"},
+  {marca:"Chevrolet", modelo:"CHEVY BLAZER 4X4 2", codigo:"JBB782"},
+  {marca:"Jeep", modelo:"73 JEEP J10", codigo:"HKG61"},
 ];
 
 const select = document.getElementById('brandSelect');
 const grid = document.getElementById('grid');
 const count = document.getElementById('count');
 const empty = document.getElementById('empty');
-document.getElementById('totalCount').textContent = data.length;
+const TOT=data.reduce((a,c)=>a+(c.cant||1),0);
+document.getElementById('totalCount').textContent = TOT;
+if(TOT!==data.length)document.getElementById('totalSub').textContent=' · '+data.length+' modelos distintos';
 
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
@@ -118,35 +204,28 @@ document.getElementById('lightboxClose').addEventListener('click', ()=>lightbox.
 lightbox.addEventListener('click', (e)=>{ if(e.target===lightbox) lightbox.classList.remove('open'); });
 
 const brandCounts = {};
-data.forEach(c => brandCounts[c.marca] = (brandCounts[c.marca]||0)+1);
+data.forEach(c => brandCounts[c.marca] = (brandCounts[c.marca]||0)+(c.cant||1));
 Object.keys(brandCounts).sort().forEach(b=>{
   const o=document.createElement('option');
   o.value=b; o.textContent = b + " (" + brandCounts[b] + ")";
   select.appendChild(o);
 });
 
-const search = document.getElementById('search');
-
 function render(){
   const b = select.value;
-  const q = search.value.trim().toLowerCase();
   grid.innerHTML='';
-  const hasFilter = b || q;
-  if(!hasFilter){count.innerHTML='';empty.style.display='block';empty.textContent='Selecciona una marca o escribe para buscar.';return;}
-  const cars = data.filter(c =>
-    (!b || c.marca===b) &&
-    (!q || c.marca.toLowerCase().includes(q) || c.codigo.toLowerCase().includes(q) || c.modelo.toLowerCase().includes(q))
-  );
+  if(!b){count.innerHTML='';empty.style.display='block';empty.textContent='Selecciona una marca para ver tus carros.';return;}
+  const cars = data.filter(c => c.marca===b);
   empty.style.display = cars.length ? 'none' : 'block';
-  empty.textContent = 'No hay resultados con ese filtro.';
-  count.innerHTML = cars.length ? ("<b>" + cars.length + "</b> carritos encontrados") : "";
+  const nc=cars.reduce((a,c)=>a+(c.cant||1),0);
+  count.innerHTML = cars.length ? ("<b>" + nc + "</b> carritos") : "";
   cars.forEach(c=>{
     const card=document.createElement('div');
     card.className='card';
     card.innerHTML =
       '<div class="photo"><img src="' + c.codigo + '.jpeg" alt="' + c.modelo + '"></div>' +
       '<div class="info"><div class="name">' + c.modelo + '</div>' +
-      '<div class="code">' + c.codigo + '</div></div>';
+      '<div class="code">' + c.codigo + (c.cant>1?' <span class="rep">×' + c.cant + '</span>':'') + '</div></div>';
     const img=card.querySelector('img');
     const photoDiv=card.querySelector('.photo');
     img.onerror=()=>{
@@ -167,7 +246,6 @@ function render(){
   });
 }
 select.addEventListener('change',render);
-search.addEventListener('input',render);
 render();
 
 </script>
